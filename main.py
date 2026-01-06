@@ -6,81 +6,39 @@ from googleapiclient.discovery import build
 
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
-
 SERVICE_ACCOUNT_FILE = "gcp.json"
-
 credentials = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes = SCOPES)
-
 service = build('sheets', 'v4', credentials = credentials)
-
 sheet = service.spreadsheets()
-
 sheet_id = '1gm5tL_4mEqldSFhD14PaPOkO_o-ojWbBBJ4Tw863gug'
-
-
-
-## consolidate redundancies## consolidate redundancies## consolidate redundancies
-
-sheet_read = sheet.values().get(spreadsheetId = sheet_id, range = 'H2').execute()
-
-total = sheet_read.get('values')[0][0]
-
-
-print(total)
 
 last_updated = datetime.date.today()
 
-print(last_updated)
+def get_from_sheet(range):
+    sheet_read = sheet.values().get(spreadsheetId = sheet_id, range = range).execute()
+    val = float(sheet_read.get('values')[0][0])
+    return val
 
-sheet_read_cash = sheet.values().get(spreadsheetId = sheet_id, range = 'J10').execute()
+## consolidate redundancies## consolidate redundancies## consolidate redundancies
+##created funcs to address redundancies
 
-cash = float(sheet_read_cash.get('values')[0][0])
+worth = get_from_sheet('H2')
+cash = get_from_sheet('J10')
+etf_value = get_from_sheet('P5')
+stock_value = get_from_sheet('F10')
+etf_invested = get_from_sheet('N5')
+stock_invested = get_from_sheet("D10")
 
-print(cash)
-
-
-sheet_read_cash = sheet.values().get(spreadsheetId = sheet_id, range = 'D10').execute()
-
-stock_invested = float(sheet_read_cash.get('values')[0][0])
-
-print(stock_invested)
-
-
-sheet_read_cash = sheet.values().get(spreadsheetId = sheet_id, range = 'F10').execute()
-
-stock_value = float(sheet_read_cash.get('values')[0][0])
-
-print(stock_value)
-
-
-sheet_read_cash = sheet.values().get(spreadsheetId = sheet_id, range = 'N5').execute()
-
-etf_invested = float(sheet_read_cash.get('values')[0][0])
-
-print(etf_invested)
-
-sheet_read_cash = sheet.values().get(spreadsheetId = sheet_id, range = 'P5').execute()
-
-etf_value = float(sheet_read_cash.get('values')[0][0])
-
-print(etf_value)
-
-worth = cash + etf_value + stock_value
 invested = etf_invested + stock_invested
-profit = worth - invested 
+profit = (stock_value + etf_value) - invested
 
-print(f'ACCOUNT WORTH : {worth:.2f}')
+print(f'ACCOUNT WORTH including cash : {worth:.2f}')
 print(f'ACCOUNT INVESTED : {invested:.2f}')
 print(f'ACCOUNT PROFITS : {profit:.2f}')
 
 
-#tester 
-#NVDA = yf.Ticker('NVDA')
-#print(NVDA.info['regularMarketPrice'])
 
-
-
-
+# in this part we get the ticker names from the sheet and then download all the info for all the tickers at once
 sheet_read = sheet.values().get(spreadsheetId = sheet_id, range = 'A2:A9').execute()
 sheet_read_etf = sheet.values().get(spreadsheetId = sheet_id, range = 'K2:K3').execute()
 
@@ -145,12 +103,6 @@ for item in rect_values:
 
 print(holdings)
 
-
-
-
-
-
-
 print("\n -- test --\n")
 
 percents = {}
@@ -159,10 +111,6 @@ for t in tickers:
     percents[t] = ((prices[t] * holdings[t]["shares"]) - holdings[t]["total_cost"]) / holdings[t]["total_cost"]
 
 print(percents)
-
-
-
-
 
 
 ###index creation is sample###
