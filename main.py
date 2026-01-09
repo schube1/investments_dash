@@ -121,7 +121,7 @@ def build_html(last_updated, worth, invested, profit, prices, percents):
 
 
     rows = "\n".join(
-        f"<tr><td>{t}</td><td>{'' if p is None else f'${p:,.2f}'}</td><td>{percents[t]* 100:,.2f}</td></tr>"
+        f"<tr><td>{t}</td><td>{'' if p is None else f'${p:,.2f}'}</td><td>{percents[t]* 100:,.2f}%</td></tr>"
         for t, p in prices.items()
     )
 
