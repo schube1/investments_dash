@@ -63,7 +63,7 @@ etf_holdings = utils.get_holdings(sheet, configs.etf_holding_range)
 holdings = {**stock_holdings, **etf_holdings}
 
 
-
+print(holdings)
 percents = {}
 
 for t in tickers:
@@ -76,11 +76,11 @@ print(percents)
 
 from pathlib import Path
 
-def build_html(last_updated, worth, invested, profit, prices, percents):
+def build_html(last_updated, worth, invested, profit, prices, percents, holdings):
 
     sorted_tickers = sorted(tickers, key=lambda t: percents[t], reverse=True)
     rows = "\n".join(
-        f"<tr><td>{t}</td><td>{'' if prices[t] is None else f'${prices[t]:,.2f}'}</td><td>{percents[t]* 100:,.2f}%</td></tr>"
+        f"<tr><td>{t}</td><td>{'' if prices[t] is None else f'${prices[t]:,.2f}'}</td><td>{percents[t]* 100:,.2f}%</td><td>${((holdings[t]["shares"]* prices[t]) - holdings[t]["total_cost"]):,.2f}</td><td></td></tr>"
         for t in sorted_tickers
     )
 
@@ -93,7 +93,7 @@ def build_html(last_updated, worth, invested, profit, prices, percents):
   <style>
     body {{ font-family: system-ui, -apple-system, Arial; margin: 24px; }}
     .card {{ border: 1px solid #ddd; border-radius: 12px; padding: 16px; max-width: 720px; }}
-    .grid {{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0; }}
+    .grid {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 12px 0; }}
     .metric {{ border: 1px solid #eee; border-radius: 10px; padding: 12px; }}
     table {{ width: 100%; border-collapse: collapse; margin-top: 12px; }}
     th, td {{ padding: 10px; border-bottom: 1px solid #eee; text-align: left; }}
@@ -109,11 +109,12 @@ def build_html(last_updated, worth, invested, profit, prices, percents):
       <div class="metric"><div class="muted">Worth</div><div><b>${worth:,.2f}</b></div></div>
       <div class="metric"><div class="muted">Invested</div><div><b>${invested:,.2f}</b></div></div>
       <div class="metric"><div class="muted">Profit</div><div><b>${profit:,.2f}</b></div></div>
+      <div class="metric"><div class="muted">Cash</div><div><b>${cash:,.2f}</b></div></div>
     </div>
 
-    <h2>Live Prices</h2>
+    <h2>Holdings</h2>
     <table>
-      <thead><tr><th>Ticker</th><th>Price</th><th>Total Change</th></tr></thead>
+      <thead><tr><th>Ticker</th><th>Price</th><th>Total Change</th><th>Gains</th><th>Allocation</th></tr></thead>
       <tbody>
         {rows}
       </tbody>
@@ -123,7 +124,7 @@ def build_html(last_updated, worth, invested, profit, prices, percents):
 </html>
 """
 
-html = build_html(last_updated, worth, invested, profit, prices, percents)
+html = build_html(last_updated, worth, invested, profit, prices, percents, holdings)
 Path("index.html").write_text(html, encoding="utf-8")
 print("Wrote index.html")
 
