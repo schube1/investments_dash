@@ -80,7 +80,7 @@ def build_html(last_updated, worth, invested, profit, prices, percents, holdings
 
     sorted_tickers = sorted(tickers, key=lambda t: percents[t], reverse=True)
     rows = "\n".join(
-        f"<tr><td>{t}</td><td>{'' if prices[t] is None else f'${prices[t]:,.2f}'}</td><td>{percents[t]* 100:,.2f}%</td><td>${((holdings[t]["shares"]* prices[t]) - holdings[t]["total_cost"]):,.2f}</td><td></td></tr>"
+        f"<tr><td>{t}</td><td>{'' if prices[t] is None else f'${prices[t]:,.2f}'}</td><td>{percents[t]* 100:,.2f}%</td><td>${((holdings[t]["shares"]* prices[t]) - holdings[t]["total_cost"]):,.2f}</td><td>{(((holdings[t]["shares"]* prices[t]) / worth)*100):,.2f}%</td></tr>"
         for t in sorted_tickers
     )
 
