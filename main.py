@@ -69,8 +69,8 @@ percents = {}
 for t in tickers:
     percents[t] = ((prices[t] * holdings[t]["shares"]) - holdings[t]["total_cost"]) / holdings[t]["total_cost"]
 
-print(percents)
 
+print(percents)
 
 ###index creation is sample###
 
@@ -78,10 +78,10 @@ from pathlib import Path
 
 def build_html(last_updated, worth, invested, profit, prices, percents):
 
-
+    sorted_tickers = sorted(tickers, key=lambda t: percents[t], reverse=True)
     rows = "\n".join(
-        f"<tr><td>{t}</td><td>{'' if p is None else f'${p:,.2f}'}</td><td>{percents[t]* 100:,.2f}%</td></tr>"
-        for t, p in prices.items()
+        f"<tr><td>{t}</td><td>{'' if prices[t] is None else f'${prices[t]:,.2f}'}</td><td>{percents[t]* 100:,.2f}%</td></tr>"
+        for t in sorted_tickers
     )
 
     return f"""<!doctype html>
@@ -131,6 +131,7 @@ print("Wrote index.html")
 #index creation is sample###
 
 # write to history csv inclduing timestamp, worth, invested, profit, cash, stock_value, etf_value
+"""
 import csv
 fields = ['timestamp', 'worth', 'invested', 'profit', 'cash', 'stock_value', 'etf_value']
 rows = [datetime.datetime.now(), worth, invested, profit, cash, stock_value, etf_value]
@@ -141,3 +142,4 @@ with open ('history.csv', mode = 'a', newline = '') as f:
         csvwriter.writerow(fields)
     #always write rows
     csvwriter.writerow(rows)
+"""
