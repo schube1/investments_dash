@@ -131,7 +131,7 @@ print("Wrote index.html")
 #index creation is sample###
 
 # write to history csv inclduing timestamp, worth, invested, profit, cash, stock_value, etf_value
-"""
+
 import csv
 fields = ['timestamp', 'worth', 'invested', 'profit', 'cash', 'stock_value', 'etf_value']
 rows = [datetime.datetime.now(), worth, invested, profit, cash, stock_value, etf_value]
@@ -142,4 +142,3 @@ with open ('history.csv', mode = 'a', newline = '') as f:
         csvwriter.writerow(fields)
     #always write rows
     csvwriter.writerow(rows)
-"""
