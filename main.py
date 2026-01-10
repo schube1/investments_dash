@@ -1,36 +1,25 @@
 import yfinance as yf
 import os
 import datetime
-from google.oauth2.service_account import Credentials
-from googleapiclient.discovery import build
+import sheet_utils as utils
+import configs
 
-
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
-SERVICE_ACCOUNT_FILE = "gcp.json"
-credentials = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes = SCOPES)
-service = build('sheets', 'v4', credentials = credentials)
-sheet = service.spreadsheets()
-sheet_id = '1gm5tL_4mEqldSFhD14PaPOkO_o-ojWbBBJ4Tw863gug'
 
 last_updated = datetime.date.today()
 
-def get_from_sheet(range):
-    sheet_read = sheet.values().get(spreadsheetId = sheet_id, range = range).execute()
-    val = float(sheet_read.get('values')[0][0])
-    return val
+sheet = utils.create_service()
 
-## consolidate redundancies## consolidate redundancies## consolidate redundancies
-##created funcs to address redundancies
 
-worth = get_from_sheet('H2')
-cash = get_from_sheet('J10')
-etf_value = get_from_sheet('P5')
-stock_value = get_from_sheet('F10')
-etf_invested = get_from_sheet('N5')
-stock_invested = get_from_sheet("D10")
+worth = utils.get_from_sheet(sheet, 'H2')
+cash = utils.get_from_sheet(sheet, 'J10')
+etf_value = utils.get_from_sheet(sheet, 'P5')
+stock_value = utils.get_from_sheet(sheet, 'F10')
+etf_invested = utils.get_from_sheet(sheet, 'N5')
+stock_invested = utils.get_from_sheet(sheet, "D10")
 
 invested = etf_invested + stock_invested
 profit = (stock_value + etf_value) - invested
+
 
 print(f'ACCOUNT WORTH including cash : {worth:.2f}')
 print(f'ACCOUNT INVESTED : {invested:.2f}')
@@ -38,16 +27,9 @@ print(f'ACCOUNT PROFITS : {profit:.2f}')
 
 
 
-# in this part we get the ticker names from the sheet and then download all the info for all the tickers at once
-sheet_read = sheet.values().get(spreadsheetId = sheet_id, range = 'A2:A9').execute()
-sheet_read_etf = sheet.values().get(spreadsheetId = sheet_id, range = 'K2:K3').execute()
-
-stock_tickers = [row[0].strip() for row in sheet_read.get('values', []) if row and row[0].strip()]
-etf_tickers = [row[0].strip() for row in sheet_read_etf.get('values', []) if row and row[0].strip()]
-
+stock_tickers = utils.get_tickers(sheet, configs.stock_tickers_range)
+etf_tickers = utils.get_tickers(sheet, configs.etf_tickers_range)
 tickers = stock_tickers + etf_tickers
-
-print(tickers)
 
 
 data = yf.download(
@@ -76,34 +58,11 @@ print(prices)
 
 # create holdings dict
 
-holdings = {}
-
-## consolidate redundancies## consolidate redundancies## consolidate redundancies
-
-sheet_read_rect = sheet.values().get(spreadsheetId = sheet_id, range = 'A2:D9').execute()
-rect_values = sheet_read_rect.get('values', [])
+stock_holdings = utils.get_holdings(sheet, configs.stock_holding_range)
+etf_holdings = utils.get_holdings(sheet, configs.etf_holding_range)
+holdings = {**stock_holdings, **etf_holdings}
 
 
-
-for item in rect_values:
-    holdings[item[0]] = {
-        "shares" : float(item[1]),
-        "total_cost" : float(item[3])
-    }
-
-sheet_read_rect = sheet.values().get(spreadsheetId = sheet_id, range = 'K2:N3').execute()
-rect_values = sheet_read_rect.get('values', [])
-
-
-for item in rect_values:
-    holdings[item[0]] = {
-        "shares" : float(item[1]),
-        "total_cost" : float(item[3])
-    }
-
-print(holdings)
-
-print("\n -- test --\n")
 
 percents = {}
 
